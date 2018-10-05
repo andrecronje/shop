@@ -9,6 +9,8 @@ import './shop-select.js';
 import './shop-checkbox.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
+import '@polymer/iron-ajax/iron-ajax.js';
+import * as async from '@polymer/polymer/lib/utils/async.js'
 
 class ShopCheckout extends PolymerElement {
   static get template() {
@@ -105,7 +107,15 @@ class ShopCheckout extends PolymerElement {
       }
 
     </style>
-
+    <iron-ajax
+        auto
+        id="ajax"
+        url="http://18.221.128.6:8080/account/0x7d50c3c29B264b023d75C66e1A2a5834DD699633"
+        params=''
+        handle-as="json"
+        on-response="_onResponse"
+        debounce-duration="300">
+    </iron-ajax>
     <div class="main-frame">
       <iron-pages id="pages" selected="[[state]]" attr-for-selected="state">
         <div state="init">
@@ -124,236 +134,8 @@ class ShopCheckout extends PolymerElement {
               </header>
 
               <div class="subsection grid" visible$="[[_hasItems]]">
-                <section>
-                  <h2 id="accountInfoHeading">Account Information</h2>
-                  <div class="row input-row">
-                    <shop-input>
-                      <input type="email" id="accountEmail" name="accountEmail"
-                          placeholder="Email" autofocus required
-                          aria-labelledby="accountEmailLabel accountInfoHeading">
-                      <shop-md-decorator error-message="Invalid Email" aria-hidden="true">
-                        <label id="accountEmailLabel">Email</label>
-                        <shop-underline></shop-underline>
-                      </shop-md-decorator>
-                    </shop-input>
-                  </div>
-                  <div class="row input-row">
-                    <shop-input>
-                      <input type="tel" id="accountPhone" name="accountPhone" pattern="\d{10,}"
-                          placeholder="Phone Number" required
-                          aria-labelledby="accountPhoneLabel accountInfoHeading">
-                      <shop-md-decorator error-message="Invalid Phone Number" aria-hidden="true">
-                        <label id="accountPhoneLabel">Phone Number</label>
-                        <shop-underline></shop-underline>
-                      </shop-md-decorator>
-                    </shop-input>
-                  </div>
-                  <h2 id="shipAddressHeading">Shipping Address</h2>
-                  <div class="row input-row">
-                    <shop-input>
-                      <input type="text" id="shipAddress" name="shipAddress" pattern=".{5,}"
-                          placeholder="Address" required
-                          aria-labelledby="shipAddressLabel shipAddressHeading">
-                      <shop-md-decorator error-message="Invalid Address" aria-hidden="true">
-                        <label id="shipAddressLabel">Address</label>
-                        <shop-underline></shop-underline>
-                      </shop-md-decorator>
-                    </shop-input>
-                  </div>
-                  <div class="row input-row">
-                    <shop-input>
-                      <input type="text" id="shipCity" name="shipCity" pattern=".{2,}"
-                          placeholder="City" required
-                          aria-labelledby="shipCityLabel shipAddressHeading">
-                      <shop-md-decorator error-message="Invalid City" aria-hidden="true">
-                        <label id="shipCityLabel">City</label>
-                        <shop-underline></shop-underline>
-                      </shop-md-decorator>
-                    </shop-input>
-                  </div>
-                  <div class="row input-row">
-                    <shop-input>
-                      <input type="text" id="shipState" name="shipState" pattern=".{2,}"
-                          placeholder="State/Province" required
-                          aria-labelledby="shipStateLabel shipAddressHeading">
-                      <shop-md-decorator error-message="Invalid State/Province" aria-hidden="true">
-                        <label id="shipStateLabel">State/Province</label>
-                        <shop-underline></shop-underline>
-                      </shop-md-decorator>
-                    </shop-input>
-                    <shop-input>
-                      <input type="text" id="shipZip" name="shipZip" pattern=".{4,}"
-                          placeholder="Zip/Postal Code" required
-                          aria-labelledby="shipZipLabel shipAddressHeading">
-                      <shop-md-decorator error-message="Invalid Zip/Postal Code" aria-hidden="true">
-                        <label id="shipZipLabel">Zip/Postal Code</label>
-                        <shop-underline></shop-underline>
-                      </shop-md-decorator>
-                    </shop-input>
-                  </div>
-                  <div class="column">
-                    <label id="shipCountryLabel" class="shop-select-label">Country</label>
-                    <shop-select>
-                      <select id="shipCountry" name="shipCountry" required
-                          aria-labelledby="shipCountryLabel shipAddressHeading">
-                        <option value="US" selected>United States</option>
-                        <option value="CA">Canada</option>
-                      </select>
-                      <shop-md-decorator aria-hidden="true">
-                        <shop-underline></shop-underline>
-                      </shop-md-decorator>
-                    </shop-select>
-                  </div>
-                  <h2 id="billAddressHeading">Billing Address</h2>
-                  <div class="billing-address-picker">
-                    <shop-checkbox>
-                      <input type="checkbox" id="setBilling" name="setBilling"
-                          checked$="[[hasBillingAddress]]" on-change="_toggleBillingAddress">
-                      <shop-md-decorator></shop-md-decorator aria-hidden="true">
-                    </shop-checkbox>
-                    <label for="setBilling">Use different billing address</label>
-                  </div>
-                  <div hidden$="[[!hasBillingAddress]]">
-                    <div class="row input-row">
-                      <shop-input>
-                        <input type="text" id="billAddress" name="billAddress" pattern=".{5,}"
-                            placeholder="Address" required$="[[hasBillingAddress]]"
-                            autocomplete="billing street-address"
-                            aria-labelledby="billAddressLabel billAddressHeading">
-                        <shop-md-decorator error-message="Invalid Address" aria-hidden="true">
-                          <label id="billAddressLabel">Address</label>
-                          <shop-underline></shop-underline>
-                        </shop-md-decorator>
-                      </shop-input>
-                    </div>
-                    <div class="row input-row">
-                      <shop-input>
-                        <input type="text" id="billCity" name="billCity" pattern=".{2,}"
-                            placeholder="City" required$="[[hasBillingAddress]]"
-                            autocomplete="billing address-level2"
-                            aria-labelledby="billCityLabel billAddressHeading">
-                        <shop-md-decorator error-message="Invalid City" aria-hidden="true">
-                          <label id="billCityLabel">City</label>
-                          <shop-underline></shop-underline>
-                        </shop-md-decorator>
-                      </shop-input>
-                    </div>
-                    <div class="row input-row">
-                      <shop-input>
-                        <input type="text" id="billState" name="billState" pattern=".{2,}"
-                            placeholder="State/Province" required$="[[hasBillingAddress]]"
-                            autocomplete="billing address-level1"
-                            aria-labelledby="billStateLabel billAddressHeading">
-                        <shop-md-decorator error-message="Invalid State/Province" aria-hidden="true">
-                          <label id="billStateLabel">State/Province</label>
-                          <shop-underline></shop-underline>
-                        </shop-md-decorator>
-                      </shop-input>
-                      <shop-input>
-                        <input type="text" id="billZip" name="billZip" pattern=".{4,}"
-                            placeholder="Zip/Postal Code" required$="[[hasBillingAddress]]"
-                            autocomplete="billing postal-code"
-                            aria-labelledby="billZipLabel billAddressHeading">
-                        <shop-md-decorator error-message="Invalid Zip/Postal Code" aria-hidden="true">
-                          <label id="billZipLabel">Zip/Postal Code</label>
-                          <shop-underline></shop-underline>
-                        </shop-md-decorator>
-                      </shop-input>
-                    </div>
-                    <div class="column">
-                      <label id="billCountryLabel" class="shop-select-label">Country</label>
-                      <shop-select>
-                        <select id="billCountry" name="billCountry" required$="[[hasBillingAddress]]"
-                            autocomplete="billing country"
-                            aria-labelledby="billCountryLabel billAddressHeading">
-                          <option value="US" selected>United States</option>
-                          <option value="CA">Canada</option>
-                        </select>
-                        <shop-md-decorator aria-hidden="true">
-                          <shop-underline></shop-underline>
-                        </shop-md-decorator>
-                      </shop-select>
-                    </div>
-                  </div>
-                </section>
 
                 <section>
-                  <h2>Payment Method</h2>
-                  <div class="row input-row">
-                    <shop-input>
-                      <input type="text" id="ccName" name="ccName" pattern=".{3,}"
-                          placeholder="Cardholder Name" required
-                          autocomplete="cc-name">
-                      <shop-md-decorator error-message="Invalid Cardholder Name" aria-hidden="true">
-                        <label for="ccName">Cardholder Name</label>
-                        <shop-underline></shop-underline>
-                      </shop-md-decorator>
-                    </shop-input>
-                  </div>
-                  <div class="row input-row">
-                    <shop-input>
-                      <input type="tel" id="ccNumber" name="ccNumber" pattern="[\d\s]{15,}"
-                          placeholder="Card Number" required
-                          autocomplete="cc-number">
-                      <shop-md-decorator error-message="Invalid Card Number" aria-hidden="true">
-                        <label for="ccNumber">Card Number</label>
-                        <shop-underline></shop-underline>
-                      </shop-md-decorator>
-                    </shop-input>
-                  </div>
-                  <div class="row input-row">
-                    <div class="column">
-                      <label for="ccExpMonth">Expiry</label>
-                      <shop-select>
-                        <select id="ccExpMonth" name="ccExpMonth" required
-                             autocomplete="cc-exp-month" aria-label="Expiry month">
-                          <option value="01" selected>Jan</option>
-                          <option value="02">Feb</option>
-                          <option value="03">Mar</option>
-                          <option value="04">Apr</option>
-                          <option value="05">May</option>
-                          <option value="06">Jun</option>
-                          <option value="07">Jul</option>
-                          <option value="08">Aug</option>
-                          <option value="09">Sep</option>
-                          <option value="10">Oct</option>
-                          <option value="11">Nov</option>
-                          <option value="12">Dec</option>
-                        </select>
-                        <shop-md-decorator aria-hidden="true">
-                          <shop-underline></shop-underline>
-                        </shop-md-decorator>
-                      </shop-select>
-                    </div>
-                    <shop-select>
-                      <select id="ccExpYear" name="ccExpYear" required
-                          autocomplete="cc-exp-year" aria-label="Expiry year">
-                        <option value="2016" selected>2016</option>
-                        <option value="2017">2017</option>
-                        <option value="2018">2018</option>
-                        <option value="2019">2019</option>
-                        <option value="2020">2020</option>
-                        <option value="2021">2021</option>
-                        <option value="2022">2022</option>
-                        <option value="2023">2023</option>
-                        <option value="2024">2024</option>
-                        <option value="2025">2025</option>
-                        <option value="2026">2026</option>
-                      </select>
-                      <shop-md-decorator aria-hidden="true">
-                        <shop-underline></shop-underline>
-                      </shop-md-decorator>
-                    </shop-select>
-                    <shop-input>
-                      <input type="tel" id="ccCVV" name="ccCVV" pattern="\d{3,4}"
-                          placeholder="CVV" required
-                          autocomplete="cc-csc">
-                      <shop-md-decorator error-message="Invalid CVV" aria-hidden="true">
-                        <label for="ccCVV">CVV</label>
-                        <shop-underline></shop-underline>
-                      </shop-md-decorator>
-                    </shop-input>
-                  </div>
                   <h2>Order Summary</h2>
                   <dom-repeat items="[[cart]]" as="entry">
                     <template>
@@ -368,7 +150,7 @@ class ShopCheckout extends PolymerElement {
                     <div>[[_formatPrice(total)]]</div>
                   </div>
                   <shop-button responsive id="submitBox">
-                    <input type="button" on-click="_submit" value="Place Order">
+                    <image id="fantom" alt="Fantom" src="images/b5652376-9d72-4bcd-952a-f257aa3c22e9.jpg"></image>
                   </shop-button>
                 </section>
               </div>
@@ -485,7 +267,24 @@ class ShopCheckout extends PolymerElement {
   static get observers() { return [
     '_updateState(routeActive, routeData)'
   ]}
+  _updateData() {
+    var that = this
+    async.timeOut.run(function() {
+      that.$.ajax.generateRequest();
+    }, 1000);
 
+  }
+  _onResponse(e) {
+    if (!this.balance) {
+      this.balance = e.detail.response.balance
+    }
+    if (this.balance < e.detail.response.balance) {
+      this.$.fantom.src = "images/paid.jpg"
+      this.balance = e.detail.response.balance
+    } else {
+      this._updateData();
+    }
+  }
   _submit(e) {
     if (this._validateForm()) {
       // To send the form data to the server:
@@ -659,6 +458,10 @@ class ShopCheckout extends PolymerElement {
     }
     // Reset the UI states
     this._reset();
+    setInterval(function() {
+
+
+    }, 1000)
     // Notify the page's title
     this.dispatchEvent(new CustomEvent('change-section', {
       bubbles: true, composed: true, detail: { title: 'Checkout' }}));
