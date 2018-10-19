@@ -12,6 +12,8 @@ import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import '@polymer/iron-ajax/iron-ajax.js';
 import * as async from '@polymer/polymer/lib/utils/async.js'
 
+var __awesome_qr_base_path = "js";
+
 class ShopCheckout extends PolymerElement {
   static get template() {
     return html`
@@ -147,11 +149,17 @@ class ShopCheckout extends PolymerElement {
                   </dom-repeat>
                   <div class="row total-row">
                     <div class="flex">Total</div>
-                    <div>[[_formatPrice(total)]]</div>
+                    <div id="total">[[_formatPrice(total)]]</div>
                   </div>
-                  <shop-button responsive id="submitBox">
-                    <image id="fantom" alt="Fantom" src="images/b5652376-9d72-4bcd-952a-f257aa3c22e9.jpg"></image>
-                  </shop-button>
+                  <div class="row total-row">
+                    <div class="flex">Paid</div>
+                    <div id="totalPaid">[[_formatPrice(0)]]</div>
+                  </div>
+                  <img
+                    id="qrcode"
+                    style="margin-top: 0;"
+                    class="responsive-img"
+                    src="images/b5652376-9d72-4bcd-952a-f257aa3c22e9.jpg">
                 </section>
               </div>
             </form>
@@ -275,16 +283,65 @@ class ShopCheckout extends PolymerElement {
 
   }
   _onResponse(e) {
-    if (!this.balance) {
+    e.detail.response.balance = e.detail.response.balance / 10**18
+    if (this.balance == undefined) {
       this.balance = e.detail.response.balance
+      this.paid = 0
     }
     if (this.balance < e.detail.response.balance) {
-      this.$.fantom.src = "images/paid.jpg"
+      this.paid += e.detail.response.balance - this.balance
       this.balance = e.detail.response.balance
+
+      console.log(this.paid)
+      console.log(this.owed)
+      console.log(this.owed - this.paid)
+
+      this.$.total.innerHTML = this._format(this.owed - this.paid)
+      this.$.totalPaid.innerHTML = this._format(this.paid)
+    }
+
+    if (this.paid > this.owed) {
+      this.$.qrcode.src = "images/paid.jpg"
     } else {
       this._updateData();
     }
   }
+  ready() {
+    super.ready();
+    var fixtureWallet = EthJS.Wallet.generate()
+    console.log(fixtureWallet.getChecksumAddressString())
+    this.address = fixtureWallet.getChecksumAddressString()
+    console.log(this.$.ajax.url)
+    this.$.ajax.url = 'http://18.221.128.6:8080/account/'+this.address
+
+
+
+    var that = this
+    require([__awesome_qr_base_path + '/awesome-qr.min'], function (AwesomeQR) {
+      var logo = new Image();
+      logo.crossOrigin = "Anonymous";
+      logo.onload = () => {
+        AwesomeQR.create({
+          text: that.address,
+          size: 320,
+          margin: 20,
+          logoImage: logo,
+          logoScale: 0.2,
+          //bindElement: '#qrcode',
+          callback: function (data) {
+            console.log(that.$.qrcode.src)
+            that.$.qrcode.src = data
+          }
+        });
+      };
+      logo.src = "images/fantom.png";
+    })
+
+  }
+  connectedCallback() {
+    super.connectedCallback();
+  }
+
   _submit(e) {
     if (this._validateForm()) {
       // To send the form data to the server:
@@ -445,7 +502,13 @@ class ShopCheckout extends PolymerElement {
   }
 
   _formatPrice(total) {
-    return isNaN(total) ? '' : '$' + total.toFixed(2);
+    this.owed = total
+    console.log(this.owed)
+    return isNaN(total) ? '' : '$ ' + total.toFixed(2);
+  }
+
+  _format(total) {
+    return isNaN(total) ? '' : '$ ' + total.toFixed(2);
   }
 
   _getEntryTotal(entry) {

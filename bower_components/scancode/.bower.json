@@ -1,0 +1,42 @@
+{
+  "name": "scancode",
+  "version": "0.1.1",
+  "authors": [
+    "jnyryan <jnyryan@gmail.com>"
+  ],
+  "description": "Display QR Codes or Barcodes using a single element",
+  "main": "index.html",
+  "keywords": [
+    "Polymer",
+    "web-components",
+    "QR",
+    "QRCode",
+    "quickread",
+    "quick read",
+    "barcode",
+    "scanner"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/jnyryan/scancode-polymer.git",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.0.0",
+    "jquery": "~2.1.4"
+  },
+  "_release": "0.1.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.1.1",
+    "commit": "faca3235031ebfc651fe678bb02a0ad99b54bde4"
+  },
+  "_source": "https://github.com/jnyryan/scancode-polymer.git",
+  "_target": "^0.1.1",
+  "_originalSource": "scancode",
+  "_direct": true
+}

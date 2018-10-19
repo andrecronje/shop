@@ -32,7 +32,8 @@
     "@polymer/paper-spinner": "^3.0.0",
     "@polymer/polymer": "^3.0.0",
     "@webcomponents/webcomponentsjs": "^2.0.0",
-    "axios": "^0.18.0"
+    "axios": "^0.18.0",
+    "ethereum-qr-code": "^0.3.0"
   },
   "devDependencies": {
     "del": "^3.0.0",
